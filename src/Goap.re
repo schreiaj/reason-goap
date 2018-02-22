@@ -7,17 +7,18 @@ type action = {
   name: string,
   preconditions: list(state),
   results: list(state),
-  cost: float
+  cost: int
 };
 
 type world = list(state);
 
-type plan = {
-  cost: float,
+
+/* type plan = {
+  cost: int,
   actions: list(action),
   preconditions: list(state),
   results: list(state)
-};
+}; */
 
 type actor = {
   actions: list(action),
@@ -50,6 +51,6 @@ let findValidActions = (worldState: world, actor: actor) :list(action) => {
   List.filter((a) => {actionIsValid(worldState, a)}, actor.actions);
 };
 
-let prioritizeActions = (actions :list(action)) => {
-  
+let prioritizeActions = (actions :list(action)) :list(action) => {
+  List.sort((a,b):int => b.cost - a.cost, actions);
 }

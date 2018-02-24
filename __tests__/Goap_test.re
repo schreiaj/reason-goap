@@ -4,11 +4,12 @@ open Expect;
 open Goap;
 
 let w  = [{name: "foo", value: false}, {name: "bar", value: true}];
-let action = {name: "Change Foo", preconditions: [{name: "bar", value: true}], results: [{name:"foo", value: true}, {name: "bar", value: false}], cost: 2};
-let action2 = {name: "Change Bar", preconditions: [{name: "foo", value: true}], results: [{name:"bar", value: true}, {name: "foo", value: false}], cost: 1};
+let w2  = [{name: "foo", value: true}, {name: "bar", value: false}];
+let a = {name: "Change Foo", preconditions: [{name: "bar", value: true}], results: [{name:"foo", value: true}, {name: "bar", value: false}], cost: 2};
+let a2 = {name: "Change Bar", preconditions: [{name: "foo", value: true}], results: [{name:"bar", value: true}, {name: "foo", value: false}], cost: 1};
 
-let actor = {actions: [action, action2], name: "Test Actor"};
-let actor2 = {actions: [action2], name: "Test Actor"};
+let testActor = {actions: [a, a2], name: "Test Actor"};
+let testActor2 = {actions: [a], name: "Test Actor"};
 
 
 describe("stateIsValid", () => {
@@ -22,18 +23,27 @@ describe("stateIsValid", () => {
 
 describe("actionIsValid", () => {
   test("valid action", () => {
-    expect(Goap.actionIsValid(w, action)) |> toBe(true);
+    expect(Goap.actionIsValid(w, a)) |> toBe(true);
   });
   test("invalid action", () => {
-    expect(Goap.actionIsValid(w, action2)) |> toBe(false);
+    expect(Goap.actionIsValid(w, a2)) |> toBe(false);
   });
 });
 
 describe("findValidActions", () => {
   test("hasValidActions", () => {
-    expect(Goap.findValidActions(w, actor)) |> toEqual([action]);
+    expect(Goap.findValidActions(w, [a, a2])) |> toEqual([a]);
   });
   test("has no valid actions", () => {
-    expect(Goap.findValidActions(w, actor2)) |> toEqual([]);
+    expect(Goap.findValidActions(w, [a2])) |> toEqual([]);
+  });
+});
+
+describe("world equality", () => {
+  test("assert worlds are equal", () =>{
+    expect(Goap.checkWorld(w,w)) |> toEqual(true);
+  });
+  test("assert worlds are not equal", () =>{
+    expect(Goap.checkWorld(w,w2)) |> toEqual(false);
   });
 });

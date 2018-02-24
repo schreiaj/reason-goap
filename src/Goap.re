@@ -10,15 +10,11 @@ type action = {
   cost: int
 };
 
+type plan = (list(action), int, bool);
+
+
 type world = list(state);
 
-
-/* type plan = {
-  cost: int,
-  actions: list(action),
-  preconditions: list(state),
-  results: list(state)
-}; */
 
 type actor = {
   actions: list(action),
@@ -47,10 +43,42 @@ let applyAction = (worldState: world, action: action) :world => {
   List.fold_left(applyResult, worldState ,action.results);
 };
 
-let findValidActions = (worldState: world, actor: actor) :list(action) => {
-  List.filter((a) => {actionIsValid(worldState, a)}, actor.actions);
+let findValidActions = (worldState: world, actions: list(action)) :list(action) => {
+  List.filter((a) => {actionIsValid(worldState, a)}, actions);
 };
 
 let prioritizeActions = (actions :list(action)) :list(action) => {
   List.sort((a,b):int => b.cost - a.cost, actions);
-}
+};
+
+let planCost = (actions: list(action)) :int => {
+  List.fold_left((prev:int, a:action) => prev + a.cost, 0, actions);
+};
+
+let checkWorld = (w1: world, w2: world) :bool => {
+  w1 == w2;
+};
+
+let rec planDFS = (actions: list(action), worldState: world, goalState: world, maxPlanLength:int, plan: list(action)) => {
+  let solved = checkWorld(worldState, goalState);
+  switch ((solved, List.length(plan) > maxPlanLength)) {
+    | (_, true) => (plan, planCost(plan), solved)
+    | (true, _) => (plan, planCost(plan), solved)
+    | (false, _) => {
+      /* We find out what we CAN do and order it by cheapest cost */
+      let validActions = findValidActions(worldState, actions) |> prioritizeActions;
+      switch(validActions) {
+          | [] => ([], -1, false)
+          | _ => {
+            /* If I have actions I can do... */
+            let attempts = List.map((act) => planDFS(actions, applyAction(worldState, act), goalState, maxPlanLength-1, List.append(plan, [act])), validActions);
+            /* For now, let's just return the FIRST plan not the optimal one */
+            switch(attempts) {
+              | [] => ([], -1, false)
+              | _ => List.hd(attempts)
+            }
+          }
+        }
+      }
+    }
+  };

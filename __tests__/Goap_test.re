@@ -11,6 +11,12 @@ let a2 = {name: "Change Bar", preconditions: [{name: "foo", value: true}], resul
 let testActor = {actions: [a, a2], name: "Test Actor"};
 let testActor2 = {actions: [a], name: "Test Actor"};
 
+describe("action sorting", () => {
+  test("actions should be sorted by cheapest ones first", () => {
+    let actions = Goap.prioritizeActions([a,a2]);
+    expect(List.hd(actions)) |> toEqual(a2);
+  })
+});
 
 describe("stateIsValid", () => {
   test("valid state", () => {
@@ -45,5 +51,12 @@ describe("world equality", () => {
   });
   test("assert worlds are not equal", () =>{
     expect(Goap.checkWorld(w,w2)) |> toEqual(false);
+  });
+});
+
+describe("prioritizePlans properly sorts plans", () => {
+  test("plans sort sanely", () => {
+    let (_, cost, _) = Goap.prioritizePlans([([], 1, true), ([], 5, true), ([], 3, true)]);
+    expect(cost) |> toEqual(1)
   });
 });

@@ -48,7 +48,18 @@ let findValidActions = (worldState: world, actions: list(action)) :list(action) 
 };
 
 let prioritizeActions = (actions :list(action)) :list(action) => {
-  List.sort((a,b):int => b.cost - a.cost, actions);
+  List.sort((a,b):int => a.cost - b.cost, actions);
+};
+
+let prioritizePlans = (plans) => {
+  switch(plans) {
+    | [] => ([], -1, false)
+    | _ => List.hd(List.sort((a,b):int => {
+      let (_, costA, _) = a;
+      let (_, costB, _) = b;
+      costA - costB
+    }, plans));
+  }
 };
 
 let planCost = (actions: list(action)) :int => {
@@ -59,6 +70,10 @@ let checkWorld = (w1: world, w2: world) :bool => {
   w1 == w2;
 };
 
+/*
+Currently implemented as a simple DFS
+TODO Implement A* by having it sort the plan and try the cheapest plans first.
+*/
 let rec planDFS = (actions: list(action), worldState: world, goalState: world, maxPlanLength:int, plan: list(action)) => {
   let solved = checkWorld(worldState, goalState);
   switch ((solved, List.length(plan) > maxPlanLength)) {
@@ -75,7 +90,7 @@ let rec planDFS = (actions: list(action), worldState: world, goalState: world, m
             /* For now, let's just return the FIRST plan not the optimal one */
             switch(attempts) {
               | [] => ([], -1, false)
-              | _ => List.hd(attempts)
+              | _ => prioritizePlans(attempts)
             }
           }
         }

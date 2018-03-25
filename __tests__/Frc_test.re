@@ -43,7 +43,8 @@ let actions = [
 
 describe("find path", () => {
   test("assert a plan was created", () =>{
-    let (_,cost, valid) = Goap.planDFS(actions, worldState, goalState, 10, []);
+    let (actions,cost, valid) = Goap.planDFS(actions, worldState, goalState, 10, []);
+    Js.log(actions);
     expect((cost, valid)) |> toEqual(((8, true)));
   });
 });

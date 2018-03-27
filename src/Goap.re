@@ -1,8 +1,10 @@
+[@bs.deriving jsConverter]
 type state = {
   name: string,
   value: bool
 };
 
+[@bs.deriving jsConverter]
 type action = {
   name: string,
   preconditions: list(state),
@@ -14,6 +16,7 @@ type plan = (list(action), int, bool);
 
 type world = list(state);
 
+[@bs.deriving jsConverter]
 type actor = {
   actions: list(action),
   name: string

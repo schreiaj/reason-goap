@@ -4,7 +4,6 @@ type state = {
   value: bool
 };
 
-[@bs.deriving jsConverter]
 type action = {
   name: string,
   preconditions: list(state),
@@ -12,11 +11,19 @@ type action = {
   cost: int
 };
 
+let actionFromJs = action => {
+  name: action##name,
+  preconditions: List.map(stateFromJs, action##preconditions),
+  results: List.map(stateFromJs, action##results),
+  cost: action##cost
+};
+
 type plan = (list(action), int, bool);
 
 type world = list(state);
 
-[@bs.deriving jsConverter]
+let worldFromJs = world => List.map(stateFromJs, world);
+
 type actor = {
   actions: list(action),
   name: string

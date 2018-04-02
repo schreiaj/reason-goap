@@ -4,6 +4,7 @@ type state = {
   value: bool
 };
 
+[@bs.deriving jsConverter]
 type action = {
   name: string,
   preconditions: list(state),
@@ -11,23 +12,29 @@ type action = {
   cost: int
 };
 
-let actionFromJs = action => {
-  name: action##name,
-  preconditions: List.map(stateFromJs, action##preconditions),
-  results: List.map(stateFromJs, action##results),
-  cost: action##cost
-};
-
 type plan = (list(action), int, bool);
 
 type world = list(state);
 
-let worldFromJs = world => List.map(stateFromJs, world);
-
+/* let worldFromJs = world => List.map(stateFromJs, world); */
 type actor = {
   actions: list(action),
   name: string
 };
+
+let stateJSON = json =>
+  Json.Decode.{
+    name: json |> field("name", string),
+    value: json |> field("value", bool)
+  };
+
+let actionJSON = json =>
+  Json.Decode.{
+    name: json |> field("name", string),
+    preconditions: json |> field("preconditions", list(stateJSON)),
+    results: json |> field("results", list(stateJSON)),
+    cost: json |> field("cost", int)
+  };
 
 let stateIsValid = (worldState: world, state: state) : bool => {
   let currentValue =
